@@ -44,3 +44,18 @@ func TestBufferedPublishConsume(t *testing.T) {
 		t.Errorf("unexpected response: %s", string(resp))
 	}
 }
+
+func TestEmptyQueue(t *testing.T) {
+	ctx := context.Background()
+	q := queue.NewArrayQueue()
+	h := NewHandler(q)
+
+	req := httptest.NewRequestWithContext(ctx, "GET", "/", nil)
+
+	wr := httptest.NewRecorder()
+	h.ServeHTTP(wr, req)
+
+	if wr.Result().StatusCode != http.StatusNotFound {
+		t.Errorf("unexpected status code: %d", wr.Result().StatusCode)
+	}
+}

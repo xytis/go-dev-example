@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"io"
 	"net/http"
 
@@ -51,6 +52,10 @@ func (h *handler) IngestMessage(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) RetrieveMessage(w http.ResponseWriter, _ *http.Request) {
 	msg, err := h.queue.Pull()
+	if errors.Is(err, queue.EOQueue) {
+		x.ApiEmpty(w)
+		return
+	}
 	if err != nil {
 		x.ApiError(w, err)
 		return

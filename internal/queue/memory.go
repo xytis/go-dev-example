@@ -64,7 +64,7 @@ func (m *arrayQueue) Pull() (Message, error) {
 	if len(m.queue) == 0 {
 		// Note: This is used to avoid changing the code if Message type changes.
 		var zero Message
-		return zero, errors.New("empty queue")
+		return zero, EOQueue
 	}
 	msg := m.queue[0]
 	// Intentional memory leak.

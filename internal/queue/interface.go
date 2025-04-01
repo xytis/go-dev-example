@@ -1,5 +1,9 @@
 package queue
 
+import "errors"
+
+var EOQueue = errors.New("empty queue")
+
 type SimpleQueue interface {
 	Push(msg Message) error
 	Pull() (Message, error)

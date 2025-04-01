@@ -16,6 +16,10 @@ func ApiSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func ApiEmpty(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+}
+
 func ApiPayload(w http.ResponseWriter, payload []byte) {
 	w.WriteHeader(http.StatusOK)
 	n, err := w.Write(payload)

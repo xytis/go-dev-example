@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bufio"
+	"context"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/xytis/go-dev-example/handlers"
 	"github.com/xytis/go-dev-example/internal/queue"
@@ -38,6 +43,7 @@ func runQueue() {
 
 	h := handlers.NewHandler(q)
 
+	fmt.Println(" listening on :8080")
 	if err := http.ListenAndServe(":8080", h); err != nil {
 		// Note: panic is intentional here.
 		//  Even though in this particular case it will provide zero extra information
@@ -48,6 +54,74 @@ func runQueue() {
 }
 
 func runClient(input, output string) {
-	fmt.Println(input)
-	fmt.Println(output)
+	ctx := context.Background()
+
+	{
+		fmt.Println("reading from ", input, " writing to http://localhost:8080")
+		in, err := os.Open(input)
+		if err != nil {
+			panic(err)
+		}
+		defer in.Close()
+		// Note: defers are not executed on lexical scope end. This is purely for aesthetics.
+
+		scanner := bufio.NewScanner(in)
+		for scanner.Scan() {
+			msg := scanner.Text()
+			req, err := http.NewRequestWithContext(ctx, "POST", "http://localhost:8080/", strings.NewReader(msg))
+			if err != nil {
+				panic(err)
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			resp.Body.Close()
+		}
+
+		if err := scanner.Err(); err != nil {
+			panic(err)
+		}
+
+		fmt.Println("done")
+	}
+
+	{
+		fmt.Println("reading from http://localhost:8080 writing to ", output)
+		out, err := os.Create(output)
+		if err != nil {
+			panic(err)
+		}
+		defer out.Close()
+
+		for {
+			req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/", nil)
+			if err != nil {
+				panic(err)
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
+				panic("unexpected status code")
+			}
+			if resp.StatusCode == http.StatusNotFound {
+				break
+			}
+
+			msg, err := io.ReadAll(resp.Body)
+			if err != nil {
+				panic(err)
+			}
+			_, err = fmt.Fprintln(out, string(msg))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		fmt.Println("done")
+	}
 }
