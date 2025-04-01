@@ -39,3 +39,7 @@ I did not explore http streaming, but that seems to be doable.
 
 I've added a more interesting use case (interleaving) in the tests. I could not figure out any real world
 applications for the client as described in the task.
+
+## Tools used
+
+https://mise.jdx.dev/
