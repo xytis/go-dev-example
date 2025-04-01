@@ -79,3 +79,15 @@ func (m *arrayQueue) Push(msg Message) error {
 	m.queue = append(m.queue, msg)
 	return nil
 }
+
+// Update:
+//  regarding the memory leak comments:
+//  My initial source of this pattern was here: https://go.dev/blog/slices-intro
+//  I've also found similar newer sources (https://go101.org/article/memory-leaking.html)
+//
+//  However.
+//  I wrote few tests, and I was unable to confirm any of the mentioned cases in isolation.
+//  Since I do not have any production code that uses this pattern, I am unable to neither confirm
+//  neither debunk this case.
+//
+// P.S. Just in case I tested the same on go 1.18. No change to the observation.
