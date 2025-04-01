@@ -29,7 +29,7 @@ func main() {
 	// For actual implementation I would use library like cobra, and split different operating
 	//  modes under different subcommands ('_ consume', '_ produce' and '_ queue')
 
-	consumer := flag.Bool("queue", false, "Queue mode")
+	queueMode := flag.Bool("queue", false, "Queue mode")
 
 	input := flag.String("input", "in.txt", "Input file")
 	output := flag.String("output", "out.txt", "Output file")
@@ -37,7 +37,7 @@ func main() {
 
 	flag.Parse()
 
-	if *consumer {
+	if *queueMode {
 		runQueue()
 		return
 	}
@@ -76,7 +76,6 @@ func clientUpload(ctx context.Context, url, input string) {
 		panic(err)
 	}
 	defer in.Close()
-	// Note: defers are not executed on lexical scope end. This is purely for aesthetics.
 
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {

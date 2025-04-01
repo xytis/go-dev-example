@@ -20,3 +20,22 @@ Or by executing docker for the queue service, and then running client locally:
 
 Arguments allow different execution ports and URL's.
 Docker container (and queue executable) honours `PORT` env variable.
+
+## Comments on the design
+
+### Queue
+
+Because the task was not clear on the usage, I initially implemented two scaffold interfaces, one for
+reactive queue (which can deliver messages by pushing them to a consumer) and one for static queue
+(which must be polled for new messages).
+
+In the trivial implementation, there is no way to have multiple consumers in the static queue case.
+Changing that requires persisting named queue read markers, which may be problematic and requires ACID.
+
+Reactive queue implementation requires a smarter client, in order to be useful. Due to time constraints
+I did not explore http streaming, but that seems to be doable.
+
+### Client
+
+I've added a more interesting use case (interleaving) in the tests. I could not figure out any real world
+applications for the client as described in the task.
